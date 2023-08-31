@@ -3,8 +3,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO boostorg/rational
-    REF boost-1.76.0
-    SHA512 399c1f49a73701f6db9304ac476f88af50470d96d400a68695ed3b3f8462622b4dde671053c6b3fcdd6474e5c2e7527946b79a5ea378af77337eee3b0ed16680
+    REF boost-1.82.0
+    SHA512 dbc86e1472c97b484b871c1cfc63ba6ae290ce2fe0d9083be6909cd579a36b298df6e0614a32e8cf714f9e73344bd3368b7a73b9cfd0fc6abfca33feb33b87a4
     HEAD_REF master
 )
 

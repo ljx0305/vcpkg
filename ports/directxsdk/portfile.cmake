@@ -1,4 +1,6 @@
-vcpkg_fail_port_install(ON_TARGET "LINUX" "OSX" "UWP" "ANDROID" ON_ARCH "arm")
+if(EXISTS "${CURRENT_INSTALLED_DIR}/share/dxsdk-d3dx/copyright")
+    message(FATAL_ERROR "Can't build ${PORT} if dxsdk-d3dx is installed. Please remove dxsdk-d3dx, and try to install ${PORT} again if you need it.")
+endif()
 
 message(WARNING "Build ${PORT} is deprecated, untested in CI, and requires the use of the DirectSetup legacy REDIST solution. See https://aka.ms/dxsdk for more information.")
 
@@ -8,8 +10,8 @@ vcpkg_download_distfile(ARCHIVE
     SHA512 24e1e9bda319b780124b865f4640822cfc44e4d18fbdcc8456d48fe54081652ce4ddb63d3bd8596351057cbae50fc824b8297e99f0f7c97547153162562ba73f
 )
 
-vcpkg_extract_source_archive_ex(
-    OUT_SOURCE_PATH SOURCE_PATH
+vcpkg_extract_source_archive(
+    SOURCE_PATH
     ARCHIVE ${ARCHIVE}
 )
 

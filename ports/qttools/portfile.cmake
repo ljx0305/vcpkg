@@ -1,7 +1,8 @@
 set(SCRIPT_PATH "${CURRENT_INSTALLED_DIR}/share/qtbase")
 include("${SCRIPT_PATH}/qt_install_submodule.cmake")
 
-set(${PORT}_PATCHES )#fix_static_build.patch)
+set(${PORT}_PATCHES
+    devendor-litehtml.patch)
 
 #TODO check features and setup: (means force features!)
 
@@ -33,9 +34,23 @@ set(${PORT}_PATCHES )#fix_static_build.patch)
 
 # General features:
 vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
+    FEATURES
+    "assistant" FEATURE_assistant
+    "designer" FEATURE_designer
+    "linguist" FEATURE_linguist
+    "qdbus" FEATURE_qdbus
+    "qdoc"   CMAKE_REQUIRE_FIND_PACKAGE_Clang
+    #"qdoc"   CMAKE_REQUIRE_FIND_PACKAGE_WrapLibClang
+    "qml"    CMAKE_REQUIRE_FIND_PACKAGE_Qt6Qml
+    "qml"    CMAKE_REQUIRE_FIND_PACKAGE_Qt6Quick
+    "qml"    CMAKE_REQUIRE_FIND_PACKAGE_Qt6QuickWidgets
+    "qml"    FEATURE_distancefieldgenerator
     INVERTED_FEATURES
-    "qdoc"  -DCMAKE_DISABLE_FIND_PACKAGE_Clang
-    "qdoc"  -DCMAKE_DISABLE_FIND_PACKAGE_WrapLibClang
+    "qdoc"   CMAKE_DISABLE_FIND_PACKAGE_Clang
+    "qdoc"   CMAKE_DISABLE_FIND_PACKAGE_WrapLibClang
+    "qml"    CMAKE_DISABLE_FIND_PACKAGE_Qt6Qml
+    "qml"    CMAKE_DISABLE_FIND_PACKAGE_Qt6Quick
+    "qml"    CMAKE_DISABLE_FIND_PACKAGE_Qt6QuickWidgets
     )
 
  set(TOOL_NAMES 
@@ -69,26 +84,32 @@ endif()
 
 qt_install_submodule(PATCHES    ${${PORT}_PATCHES}
                      TOOL_NAMES ${TOOL_NAMES}
-                     CONFIGURE_OPTIONS ${FEATURE_OPTIONS}
-                                       -DCMAKE_DISABLE_FIND_PACKAGE_Qt6AxContainer=ON
+                     CONFIGURE_OPTIONS 
+                           ${FEATURE_OPTIONS}
+                           -DCMAKE_DISABLE_FIND_PACKAGE_Qt6AxContainer=ON
                      CONFIGURE_OPTIONS_RELEASE
                      CONFIGURE_OPTIONS_DEBUG
                     )
-                    
+
 if(VCPKG_TARGET_IS_OSX)
-    set(OSX_APP_FOLDERS Designer.app Linguist.app pixeltool.app qdbusviewer.app)
+    set(OSX_APP_FOLDERS Designer.app Linguist.app pixeltool.app)
+    if (FEATURE_qdbus)
+        message(STATUS "Built qdbusviewer")
+        list(APPEND OSX_APP_FOLDERS qdbusviewer.app)
+    endif()
     foreach(_appfolder IN LISTS OSX_APP_FOLDERS)
-        message(STATUS "Moving: ${_appfolder}")
-        file(MAKE_DIRECTORY "${CURRENT_PACKAGES_DIR}/tools/${PORT}/bin/${_appfolder}")
-        file(RENAME "${CURRENT_PACKAGES_DIR}/bin/${_appfolder}/" "${CURRENT_PACKAGES_DIR}/tools/${PORT}/bin/${_appfolder}/")
+        # Folders are only existing in case of native builds 
+        if(EXISTS "${CURRENT_PACKAGES_DIR}/bin/${_appfolder}")
+            message(STATUS "Moving: ${_appfolder}")
+            file(MAKE_DIRECTORY "${CURRENT_PACKAGES_DIR}/tools/${PORT}/bin/${_appfolder}")
+            file(RENAME "${CURRENT_PACKAGES_DIR}/bin/${_appfolder}/" "${CURRENT_PACKAGES_DIR}/tools/${PORT}/bin/${_appfolder}/")
+        endif()    
     endforeach()
     file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/bin" "${CURRENT_PACKAGES_DIR}/debug/bin")
 endif()
 
-set(configfile "${CURRENT_PACKAGES_DIR}/share/Qt6ToolsTools/Qt6ToolsToolsTargets-debug.cmake")
-if(EXISTS "${configfile}" AND EXISTS "${CURRENT_PACKAGES_DIR}/tools/Qt6/bin/windeployqt.exe")
-    file(INSTALL "${CMAKE_CURRENT_LIST_DIR}/windeployqt.debug.bat" DESTINATION "${CURRENT_PACKAGES_DIR}/tools/Qt6/bin")
-    file(READ "${configfile}" _contents)
-    string(REPLACE [[${_IMPORT_PREFIX}/tools/Qt6/bin/windeployqt.exe]] [[${_IMPORT_PREFIX}/tools/Qt6/bin/windeployqt.debug.bat]] _contents "${_contents}")
-    file(WRITE "${configfile}" "${_contents}")
+file(GLOB_RECURSE debug_dir "${CURRENT_PACKAGES_DIR}/debug/*")
+list(LENGTH debug_dir debug_dir_elements)
+if(debug_dir_elements EQUAL 0)
+    file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug")
 endif()

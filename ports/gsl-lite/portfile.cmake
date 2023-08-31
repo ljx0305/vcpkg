@@ -1,18 +1,18 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO gsl-lite/gsl-lite
-    REF e1c381746c2625a76227255f999ae9f14a062208
-    SHA512 36b7ee945e384f1d425287a780953bf979782aa799547d08fb32e05c4671050278de34d857807de4c7e42b215900457014c49e89b7f330d522609f7cc10d47f8
+    REF 755ba124b54914e672737acace6a9314f59e8d6f
+    SHA512 d0b8397afc7704c5c9510fb62ce01f35faf9cc1cfd05ac3853bdc4b9fc4874aaa85aa70e93ff37867dc263b97926b15af2316e49a5787b246984fa086bf85563
     HEAD_REF master
 )
 
-vcpkg_configure_cmake(
+vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
-    PREFER_NINJA
 )
-
-vcpkg_install_cmake()
-vcpkg_fixup_cmake_targets(CONFIG_PATH "lib/cmake/gsl-lite")
+vcpkg_cmake_install()
+vcpkg_cmake_config_fixup(
+    CONFIG_PATH "lib/cmake/gsl-lite"
+)
 
 file(WRITE ${CURRENT_PACKAGES_DIR}/include/gsl-lite.hpp "#ifndef GSL_LITE_HPP_VCPKG_COMPAT_HEADER_INCLUDED
 #define GSL_LITE_HPP_VCPKG_COMPAT_HEADER_INCLUDED
@@ -25,4 +25,8 @@ file(REMOVE_RECURSE
     "${CURRENT_PACKAGES_DIR}/debug"
 )
 
-file(INSTALL "${SOURCE_PATH}/LICENSE" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}" RENAME copyright)
+file(INSTALL
+    "${SOURCE_PATH}/LICENSE"
+    DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}"
+    RENAME copyright
+)

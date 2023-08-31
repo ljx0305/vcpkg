@@ -1,29 +1,26 @@
-vcpkg_fail_port_install(ON_ARCH "x86" "arm" ON_TARGET "uwp")
-
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO oneapi-src/oneDNN
-    REF v2.0
-    SHA512 740fa871e29edc8bb8a54d4ba615e856712f7f63efe4c70f4a3d5f6d143d60bc51366b9355ab4b6702718ba711b48350ea49b1335ec10c1dc4f655cc9728ff3e
+    REF v3.1.1
+    SHA512 0dae0ccff1e459ce24356694732bf4ee3c459469de70984863e1aed3bc965471793a110dedbb11f2baa762749cea7652a150d2f9a442c299d9ffa00febd87fec
     HEAD_REF master
 )
 
 if (VCPKG_LIBRARY_LINKAGE STREQUAL static)
-  set(DNNL_OPTIONS "-DDNNL_LIBRARY_TYPE=STATIC")
+    set(DNNL_OPTIONS "-DDNNL_LIBRARY_TYPE=STATIC")
 endif()
 
-vcpkg_configure_cmake(
-    SOURCE_PATH ${SOURCE_PATH}
-    PREFER_NINJA
+vcpkg_cmake_configure(
+    SOURCE_PATH "${SOURCE_PATH}"
     OPTIONS ${DNNL_OPTIONS}
 )
-vcpkg_install_cmake()
+vcpkg_cmake_install()
 
 # The port name and the find_package() name are different (onednn versus dnnl)
-vcpkg_fixup_cmake_targets(CONFIG_PATH lib/cmake/dnnl TARGET_PATH share/dnnl)
+vcpkg_cmake_config_fixup(PACKAGE_NAME dnnl CONFIG_PATH lib/cmake/dnnl)
 
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
+file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/share/doc/dnnl/reference/html")
 
-# Copyright and license
-file(INSTALL ${SOURCE_PATH}/LICENSE DESTINATION ${CURRENT_PACKAGES_DIR}/share/${PORT} RENAME copyright)
+vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/LICENSE")
